@@ -18,7 +18,7 @@ public class FilePathUtil {
 
     private String parseFullPath(String relativePath) {
         try {
-            return new File(BASE_PATH + "\\" + relativePath).getCanonicalPath();
+            return new File(BASE_PATH + File.separator + relativePath).getCanonicalPath();
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());//500
         }
@@ -42,10 +42,6 @@ public class FilePathUtil {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Can not access files outside storage directory");//403
         }
         return fullPath;
-    }
-
-    public String parseSanitizedRelativePath(String fullPath) {
-        return fullPath.replace(BASE_PATH + "/", "");
     }
 
     public boolean isDirectory(String path) {

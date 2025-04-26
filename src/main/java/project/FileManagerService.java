@@ -71,7 +71,7 @@ public class FileManagerService {
         String fullPath = filePathUtil.parseAndValidatePath(path);
         File file = new File(fullPath);
         if (file.exists() && file.isDirectory()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can not overwrite the existing directory");//400
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Can not overwrite the existing directory");//409
         }
         try (FileWriter fileWriter = new FileWriter(file)) {
             fileWriter.write(content);
@@ -87,6 +87,36 @@ public class FileManagerService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Directory already exists");//409
         }
         file.mkdirs();
+    }
+
+    public void copyFile(String sourcePath, String destinationPath, boolean deleteSource) {
+        sourcePath = filePathUtil.parseAndValidateExistingFilePath(sourcePath);
+        destinationPath = filePathUtil.parseAndValidatePath(destinationPath);
+
+        File destinationFile = new File(destinationPath);
+        File sourceFile = new File(sourcePath);
+
+        try {
+            if (sourceFile.isFile()) {
+                if (destinationFile.exists() && destinationFile.isDirectory()) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Can not overwrite the existing directory");
+                }
+                FileUtils.copyFile(new File(sourcePath), destinationFile);
+                if (deleteSource) {
+                    FileUtils.delete(sourceFile);
+                }
+            } else {
+                if (destinationFile.exists() && destinationFile.isFile()) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Can not overwrite the existing file with a directory, delete it first");
+                }
+                FileUtils.copyDirectory(sourceFile, destinationFile);
+                if (deleteSource) {
+                    FileUtils.deleteDirectory(sourceFile);
+                }
+            }
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());//500
+        }
     }
 
     public void deleteFile(String path) {

@@ -49,6 +49,13 @@ public class FileManagerController {
         service.createDirectory(path);
     }
 
+    @PutMapping("/copy/{*destinationFile}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void copyFile(@PathVariable String destinationFile, @RequestHeader("From") @NonNull String sourceFile,
+                         @RequestHeader(value = "Delete-Source", required = false, defaultValue = "false") boolean deleteSource) {
+        service.copyFile(sourceFile, destinationFile, deleteSource);
+    }
+
     @DeleteMapping("{*path}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteFile(@PathVariable String path) {
