@@ -1,5 +1,7 @@
 package project;
 
+import jakarta.websocket.server.PathParam;
+import lombok.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,22 @@ public class FileManagerController {
             headers.add(key, metaInfo.get(key).toString());
         }
         return ResponseEntity.ok().headers(headers).body(null);//200
+    }
+
+    @PutMapping("/{*path}")
+    @ResponseStatus(HttpStatus.CREATED)//201
+    public void putFile(@PathVariable String path, @RequestBody @NonNull Map<String, String> body) {
+        if (!body.containsKey("content")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing content in request body");//400
+        }
+        String fileContent = body.get("content");
+        service.writeFileContent(path, fileContent);
+    }
+
+    @PutMapping("/dir/{*path}")
+    @ResponseStatus(HttpStatus.CREATED)//201
+    public void createNewDirectory(@PathVariable String path) {
+        service.createDirectory(path);
     }
 
     @ExceptionHandler(ResponseStatusException.class)

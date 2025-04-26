@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -64,5 +65,29 @@ public class FileManagerService {
 
         return Map.of("File size", fileSize,
                 "Last modified", simpleDateFormat.format(lastModifiedTime));
+    }
+
+    public void writeFileContent(String path, String content) {
+        String fullPath = filePathUtil.parseAndValidatePath(path);
+        File file = new File(fullPath);
+        if (file.exists() && file.isDirectory()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can not overwrite the existing directory");//400
+        }
+        try (FileWriter fileWriter = new FileWriter(file)) {
+            fileWriter.write(content);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());//500
+        }
+    }
+
+    public void createDirectory(String path) {
+        String fullPath = filePathUtil.parseAndValidatePath(path);
+        File file = new File(fullPath);
+        if (file.exists()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Directory already exists");//409
+        }
+        if (!file.mkdirs()) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Can not create directory");//500
+        }
     }
 }
