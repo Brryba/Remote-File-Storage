@@ -1,6 +1,5 @@
 package project;
 
-import jakarta.websocket.server.PathParam;
 import lombok.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -48,6 +47,12 @@ public class FileManagerController {
     @ResponseStatus(HttpStatus.CREATED)//201
     public void createNewDirectory(@PathVariable String path) {
         service.createDirectory(path);
+    }
+
+    @DeleteMapping("{*path}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteFile(@PathVariable String path) {
+        service.deleteFile(path);
     }
 
     @ExceptionHandler(ResponseStatusException.class)

@@ -86,8 +86,20 @@ public class FileManagerService {
         if (file.exists()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Directory already exists");//409
         }
-        if (!file.mkdirs()) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Can not create directory");//500
+        file.mkdirs();
+    }
+
+    public void deleteFile(String path) {
+        try {
+            String fullPath = filePathUtil.parseAndValidateExistingFilePath(path);
+            File file = new File(fullPath);
+            if (file.isFile()) {
+                file.delete();
+            } else {
+                FileUtils.deleteDirectory(file);
+            }
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());//500
         }
     }
 }
